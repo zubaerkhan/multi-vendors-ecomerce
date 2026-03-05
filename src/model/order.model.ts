@@ -1,0 +1,157 @@
+import mongoose from 'mongoose'
+import { IUser } from './user.model'
+import { IProduct } from './product.model'
+
+export interface IOrder {
+  products: {
+    product: IProduct
+    quantity: number
+    price: number
+  }[]
+  buyer: IUser
+  productVendor: IUser
+  productsTotalPrice: number
+  deliveryCharge: number
+  serviceCharge: number
+  totalAmount: number
+  paymentMethod: 'cod' | 'stripe'
+  isPaid: boolean
+  orderStatus:
+    | 'pending'
+    | 'confirmed'
+    | 'shipped'
+    | 'delivered'
+    | 'returned'
+    | 'cancelled'
+
+  cancelledAt?: Date
+  // new: returned amount
+  returnedAmount?: number
+  address: {
+    name: string
+    phone: string
+    address: string
+    city: string
+    pincode: string
+  }
+  paymentDetails?: {
+    stripePaymentId?: string
+    stripeSessionId?: string
+  }
+  deliveryDate?: Date
+  deliveryOtp?: string
+  otpExpiresAT?: Date
+
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+const OrderSchema = new mongoose.Schema<IOrder>(
+  {
+    products: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+
+    buyer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    productVendor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    productsTotalPrice: {
+      type: Number,
+      required: true,
+    },
+
+    deliveryCharge: {
+      type: Number,
+      default: 0,
+    },
+
+    serviceCharge: {
+      type: Number,
+      default: 0,
+    },
+
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ['cod', 'stripe'],
+      required: true,
+    },
+
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+
+    orderStatus: {
+      type: String,
+      enum: [
+        'pending',
+        'confirmed',
+        'shipped',
+        'delivered',
+        'returned',
+        'cancelled',
+      ],
+      default: 'pending',
+    },
+
+    cancelledAt: { type: Date },
+
+    returnedAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    address: {
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      pincode: { type: String, required: true },
+    },
+
+    paymentDetails: {
+      stripePaymentId: String,
+      stripeSessionId: String,
+    },
+
+    deliveryDate: { type: Date },
+
+    deliveryOtp: { type: String },
+
+    otpExpiresAT: { type: Date },
+  },
+  { timestamps: true },
+)
+
+const Order =
+  mongoose.models?.Order || mongoose.model<IOrder>('Order', OrderSchema)
+
+export default Order

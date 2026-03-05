@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+
+::-webkit-scrollbar{
+  display: none;
+}
+*{
+  scrollbar-width: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active  {
+  transition: background-color 5000s;
+  -webkit-text-fill-color: #969494 !important;
+  
+}
