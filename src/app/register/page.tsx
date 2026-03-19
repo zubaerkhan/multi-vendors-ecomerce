@@ -37,8 +37,8 @@ export default function Register() {
       setEmail("");
       setPassword("");
       router.push("/login");
-    } catch (error) {
-      console.log(error);
+      } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false);
     }
   };

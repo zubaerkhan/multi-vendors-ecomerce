@@ -72,10 +72,8 @@ export default function Profile() {
 
       alert('Profile updated successfully')
       router.back()
-    } catch (error) {
-      setLoading(false)
-      console.log(error)
-      alert('Profile updated error ❌')
+     } catch (error: any) {
+      alert(error?.response?.data?.message)
     }
   }
   return (

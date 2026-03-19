@@ -27,9 +27,9 @@ const router = useRouter()
       setLoading(false)
       alert("Verification request sent again ✅")
       router.push("/")
-    } catch (error) {
+     } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false)
-      alert("Failt to sent verification")
     }
   }
   if (!user) {

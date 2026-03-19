@@ -25,10 +25,10 @@ export async function GET(req: NextRequest) {
     }
         
 
-    return NextResponse.json(
-      { cart:  user.cart},
-      { status: 200 },
-    )
+   return NextResponse.json(
+  { cart: user.cart || [] },
+  { status: 200 },
+)
   } catch (error) {
     return NextResponse.json(
       { message: `Failt to get cart ${error}` },

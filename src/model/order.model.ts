@@ -3,6 +3,7 @@ import { IUser } from './user.model'
 import { IProduct } from './product.model'
 
 export interface IOrder {
+  _id?: mongoose.Types.ObjectId
   products: {
     product: IProduct
     quantity: number
@@ -38,7 +39,7 @@ export interface IOrder {
     stripePaymentId?: string
     stripeSessionId?: string
   }
-  deliveryDate?: Date
+  deliverDate?: Date
   deliveryOtp?: string
   otpExpiresAT?: Date
 
@@ -142,7 +143,7 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       stripeSessionId: String,
     },
 
-    deliveryDate: { type: Date },
+    deliverDate: { type: Date },
 
     deliveryOtp: { type: String },
 

@@ -41,9 +41,8 @@ export default function VendorProducts() {
       )
       dispatch(setAllProductsData(updatedProducts))
        
-    } catch (error) {
-      console.log(error)
-      alert('update isActive Error!')
+     } catch (error: any) {
+      alert(error?.response?.data?.message)
     }
   }
   return (

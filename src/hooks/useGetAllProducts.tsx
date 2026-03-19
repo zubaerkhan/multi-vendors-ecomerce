@@ -11,7 +11,7 @@ export default function UseGetAllProducts() {
     const fetchAllProduct = async () => {
       try {
         const result = await axios.get('/api/vendor/all-products')
-        dispatch(setAllProductsData(result.data))
+        dispatch(setAllProductsData(result?.data))
       } catch (error) {
         dispatch(setAllProductsData([]))
       }

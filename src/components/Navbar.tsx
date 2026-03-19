@@ -27,8 +27,8 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
 
 export default function Navbar() {
-  UseGetCurrentUser() 
-  const user = useSelector((state:RootState)=>state.user.userData)
+  UseGetCurrentUser()
+  const user = useSelector((state: RootState) => state.user.userData)
   const router = useRouter()
   const [openNemu, setOpenMenu] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -101,11 +101,20 @@ export default function Navbar() {
                   transition={{ duration: 0.5 }}
                   className='absolute right-0 mt-3 w-48  backdrop-blur-lg rounded-xl shadow-lg border bg-[#6a69693c] '
                 >
+                
                   <DropDownBtn
                     Icon={AiOutlineUser}
                     label='Profile'
                     onClick={() => {
                       router.push('/profile')
+                      setOpenMenu(false)
+                    }}
+                  />
+                    <DropDownBtn
+                    Icon={AiOutlineUser}
+                    label='Orders'
+                    onClick={() => {
+                      router.push('/orders')
                       setOpenMenu(false)
                     }}
                   />
@@ -178,6 +187,14 @@ export default function Navbar() {
                         label='Profile'
                         onClick={() => {
                           router.push('/profile')
+                          setOpenMenu(false)
+                        }}
+                      />
+                      <DropDownBtn
+                        Icon={AiOutlineUser}
+                        label='Orders'
+                        onClick={() => {
+                          router.push('/orders')
                           setOpenMenu(false)
                         }}
                       />
@@ -268,7 +285,7 @@ export default function Navbar() {
                       <SidebarBtn
                         label='Orders'
                         Icon={GoListUnordered}
-                        path={'/order'}
+                        path={'/orders'}
                         router={router}
                         setSidebarOpen={setSidebarOpen}
                       />

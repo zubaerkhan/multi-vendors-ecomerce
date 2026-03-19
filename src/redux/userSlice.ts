@@ -19,11 +19,11 @@ const userSlice = createSlice({
     setUserData: (state, action) => {
       state.userData = action.payload
     },
-    setUserOrderData: (state, action) => {
+    setAllOrdersData: (state, action) => {
       state.allOrdersData = action.payload
     },
   },
 })
 
-export const { setUserData, setUserOrderData } = userSlice.actions
+export const { setUserData, setAllOrdersData } = userSlice.actions
 export default userSlice.reducer

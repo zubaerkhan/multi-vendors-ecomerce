@@ -12,8 +12,10 @@ export default function UseGetCurrentUser() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const result = await axios.get('/api/user/currentUser')
-        dispatch(setUserData(result.data))
+        const result = await axios.get('/api/user/currentUser', {
+          withCredentials: true,
+        })
+        dispatch(setUserData(result?.data || []))
       } catch (error) {
         dispatch(setUserData(null))
       }

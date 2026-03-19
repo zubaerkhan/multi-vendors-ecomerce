@@ -45,10 +45,9 @@ const handleAproved = async () => {
       setSelectedProduct(null)
       setLoading(false)
       alert('Product approved')
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false)
-      alert('Product approval failed')
     }
   }
   const handleRejected = async () => {

@@ -36,8 +36,8 @@ const router = useRouter()
       alert("Vendor Shop Details Added Successfully")
       setLoading(false)
       router.push("/")
-    } catch (error) {
-      console.log(error)
+     } catch (error: any) {
+      alert(error?.response?.data?.message)
     }
   };
   return (

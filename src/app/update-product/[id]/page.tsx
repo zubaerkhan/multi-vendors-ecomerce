@@ -178,10 +178,9 @@ export default function UpdateProduct() {
       setLoading(false)
       alert('✅ Product Updated successfully. Waiting for admin approval.')
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false)
-      console.log('Add Product error', error)
-      alert('❌ Product Updated Failed.')
     }
   }
 

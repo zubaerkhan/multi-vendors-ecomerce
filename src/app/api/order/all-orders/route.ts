@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB()
     const session = await auth()
-    if (!session || !session?.user?.email || !session?.user.id) {
+    if (!session || !session?.user?.email || !session?.user?.id) {
       return NextResponse.json(
         { message: 'UnAuthorized User' },
         { status: 401 },

@@ -7,23 +7,29 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function CartPage() {
-    
   const [cart, setCart] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const getCart = async () => {
-    try {
-      const result = await axios.get('/api/user/cart/get')
-      setCart(result.data.cart || [])
-    } catch (error: any) {
-      console.log(error?.response?.data?.message)
-    } finally {
-      setLoading(false)
+ const getCart = async () => {
+  try {
+    const result = await axios.get('/api/user/cart/get', {
+      withCredentials: true,
+    })
+
+    if (!result || !result.data) {
+      setCart([])
+      return
     }
+
+    setCart(result?.data?.cart ?? [])
+  } catch (error: any) {
+    console.log(error)
+    setCart([])
+  } finally {
+    setLoading(false)
   }
-
-
+}
   const handleUpdateCart = async (productId: string, quantity: number) => {
     try {
       if (quantity < 1) {
@@ -34,11 +40,10 @@ export default function CartPage() {
         productId,
         quantity,
       })
-     
-      setCart(result.data.updatedUser.cart)
-    
+
+      setCart(result?.data?.updatedUser?.cart)
     } catch (error: any) {
-      alert(error.response.data.message)
+      alert(error?.response?.data?.message || 'Something went wrong')
     }
   }
   useEffect(() => {
@@ -48,9 +53,7 @@ export default function CartPage() {
   const handleRemove = async (productId: string) => {
     setCart((prev) => prev.filter((item) => item.product._id !== productId))
     const result = await axios.post('/api/user/cart/remove', { productId })
-   setCart(result.data.updatedUser.cart)
- 
-    
+   setCart(result?.data?.updatedUser?.cart || [])
   }
 
   // ✅ Loading UI
@@ -63,7 +66,7 @@ export default function CartPage() {
   }
 
   // ✅ Empty Cart
-  if (cart.length === 0) {
+  if (cart?.length === 0) {
     return (
       <div className='min-h-screen flex justify-center items-center bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 py-10 text-white text-4xl'>
         Cart Empty 😢
@@ -76,7 +79,10 @@ export default function CartPage() {
     <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white'>
       <div className='max-w-5xl mx-auto space-y-4'>
         {cart.map((item, i) => (
-          <div key={i} className='bg-white/10 p-4 rounded-lg flex flex-col md:flex-row gap-4'>
+          <div
+            key={i}
+            className='bg-white/10 p-4 rounded-lg flex flex-col md:flex-row gap-4'
+          >
             <Image
               src={item.product.images[0]}
               alt={item.product.title}
@@ -106,7 +112,10 @@ export default function CartPage() {
                 </button>
               </div>
               <div className='flex gap-2 mt-3'>
-                <button onClick={()=>router.push(`/checkout/${item.product._id}`)} className=' bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded'>
+                <button
+                  onClick={() => router.push(`/checkout/${item.product._id}`)}
+                  className=' bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded'
+                >
                   Checkout this product
                 </button>
                 <button

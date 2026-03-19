@@ -30,9 +30,8 @@ export default function SignIn() {
       alert("Signin successfully");
       router.push("/");
       setLoading(false);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
+    } catch (error: any) {
+      alert(error?.response?.data?.message)
     }
   };
 

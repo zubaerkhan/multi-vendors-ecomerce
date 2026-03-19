@@ -45,8 +45,8 @@ export default function EditRoledAndPhone() {
       console.log(result.data);
       setLoading(false);
       router.push("/")
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false);
     }
   };

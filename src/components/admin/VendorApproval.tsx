@@ -39,10 +39,9 @@ export default function VendorApproval() {
       setSelectedVendor(null)
       setLoading(false)
       alert('Vendor approved')
-    } catch (error) {
-      console.log(error)
+      } catch (error: any) {
+      alert(error?.response?.data?.message)
       setLoading(false)
-      alert('Vendor approval failed')
     }
   }
   const handleRejected = async () => {

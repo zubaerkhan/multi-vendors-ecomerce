@@ -7,7 +7,7 @@ import { setAllOrdersData } from '@/redux/userSlice'
 import axios from 'axios'
 import { AnimatePresence, motion } from 'motion/react'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FiTruck } from 'react-icons/fi'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -20,14 +20,7 @@ export default function Orders() {
   )
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
   const [trackOrderModel, setTrackOrderModel] = useState<any | null>(null)
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now())
-    }, 1000)
 
-    return () => clearInterval(timer)
-  }, [])
   const orders = Array.isArray(allOrdersData)
     ? allOrdersData.filter(
         (order) => String(order?.buyer?._id) === String(userData?._id),
@@ -116,23 +109,14 @@ export default function Orders() {
     const expiry = deliveredAt + replacementDays * 24 * 60 * 60 * 1000
     return Date.now() <= expiry
   }
-  const getRemainingTime = (deliveryDate: string, replacementDays: number) => {
-    if (!deliveryDate || !replacementDays) return null
-
+  const remainingDays = (deliveryDate: string, replacementDays: number) => {
+    if (!deliveryDate || !replacementDays) return 0
     const deliveredAt = new Date(deliveryDate).getTime()
     const expiry = deliveredAt + replacementDays * 24 * 60 * 60 * 1000
-    const diff = expiry - now
-
-    if (diff <= 0) return null
-
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000))
-    const hours = Math.floor((diff / (60 * 60 * 1000)) % 24)
-    const minutes = Math.floor((diff / (60 * 1000)) % 60)
-    const seconds = Math.floor((diff / 1000) % 60)
-
-    return { days, hours, minutes, seconds }
+    const diff = expiry - Date.now()
+    if (diff <= 0) return 0
+    return Math.ceil(diff / (24 * 60 * 60 * 1000))
   }
-
   const returnedEndDate = (deliveryDate: string, replacementDays: number) => {
     if (!deliveryDate || !replacementDays) return null
     const deliveredAt = new Date(deliveryDate)
@@ -141,22 +125,6 @@ export default function Orders() {
     return deliveredAt
   }
 
-  const returnOrderHandle = async (orderId: string) => {
-    try {
-      const result = await axios.post('api/order/return', { orderId })
-      const updateOrder = result.data.order
-
-      const newOrders = allOrdersData.map((o: any) =>
-        String(o._id) === String(updateOrder._id) ? updateOrder : o,
-      )
-
-      dispatch(setAllOrdersData(newOrders))
-      alert(result?.data?.message)
-      setSelectedOrder(null)
-    } catch (error: any) {
-      alert(error?.data?.response?.message)
-    }
-  }
   return (
     <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white'>
       <div className='max-w-6xl mx-auto '>
@@ -226,14 +194,6 @@ export default function Orders() {
                       {order.orderStatus === 'cancelled' && (
                         <span className='text-red-400 font-semibold flex justify-center'>
                           Cancelled
-                        </span>
-                      )}
-                      {order.orderStatus === 'returned' && (
-                        <span className='text-orange-400 font-semibold flex flex-col justify-center'>
-                          Returned
-                          <span className='text-nowrap'>
-                            Return amount: {" "}{order.returnedAmount} tk
-                          </span>
                         </span>
                       )}
 
@@ -338,14 +298,6 @@ export default function Orders() {
                     Cancelled
                   </span>
                 )}
-                {order.orderStatus === 'returned' && (
-                        <span className='text-orange-400 font-semibold flex flex-col justify-center'>
-                          Returned
-                          <span className='text-nowrap'>
-                            Return amount: {" "}{order.returnedAmount} tk
-                          </span>
-                        </span>
-                      )}
                 {order.orderStatus !== 'cancelled' &&
                   order.orderStatus !== 'returned' && (
                     <div className='flex justify-between gap-2 mt-4'>
@@ -536,7 +488,7 @@ export default function Orders() {
                       selectedOrder.deliverDate,
                       replacementDays,
                     )
-                    const remainingTime = getRemainingTime(
+                    const remaining = remainingDays(
                       selectedOrder.deliverDate,
                       replacementDays,
                     )
@@ -546,7 +498,7 @@ export default function Orders() {
                     )
 
                     return (
-                      <div
+                      <div 
                         key={i}
                         className='flex justify-between  items-center bg-white/5 px-3 py-2 rounded ml-2'
                       >
@@ -554,14 +506,12 @@ export default function Orders() {
                           <p className='text-xs text-gray-300 '>
                             {p.product?.title}
                           </p>
-                          {remainingTime ? (
+                          {remaining ? (
                             <>
                               <p className='text-xs text-yellow-400 '>
-                                Return in {remainingTime.days}d-
-                                {remainingTime.hours}h-{remainingTime.minutes}m-
-                                {remainingTime.seconds}s
+                                Return avilable for {remaining} day
+                                {remaining > 1 ? 's' : ''}
                               </p>
-
                               {returnEndDate && (
                                 <p className='text-[11px] text-gray-400'>
                                   Return till:{' '}
@@ -575,14 +525,7 @@ export default function Orders() {
                             </p>
                           )}
                         </div>
-                        {eligible && (
-                          <button
-                            onClick={() => returnOrderHandle(selectedOrder._id)}
-                            className='mx-3 px-3 py-1 bg-yellow-600 rounded text-sm'
-                          >
-                            Return
-                          </button>
-                        )}
+                          {eligible &&(<button className='mx-3 px-3 py-1 bg-yellow-600 rounded text-sm'>Return</button>)}
                       </div>
                     )
                   })

@@ -13,7 +13,9 @@ export default function Checkout() {
   const productId = params.id as string
   const router = useRouter()
   const [item, setItem] = useState<any>(null)
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe'>('cod')
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe' | 'ssl'>(
+    'cod',
+  )
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -27,34 +29,69 @@ export default function Checkout() {
   const codDisabled = !item?.product?.payOnDelivery
 
   const handlePlaceOrder = async () => {
-    
+    // ✅ Validation
     if (!name || !phone || !address || !city || !pincode) {
       alert('Please fill out all address fields!')
       return
     }
+
+    if (!item) {
+      alert('Product not found!')
+      return
+    }
+
+    // ✅ Payload
     const payload = {
       productId,
-      quantity: item?.quantity,
-      address: { name, phone, address, city, pincode },
+      quantity: item.quantity,
+      address: {
+        name,
+        phone,
+        address,
+        city,
+        pincode,
+      },
       amount: finalTotalPrice,
       deliveryCharge,
       serviceCharge,
     }
-  setLoading(true)
+
     try {
+      setLoading(true)
+
+      // 🔥 COD FLOW
       if (paymentMethod === 'cod') {
-        const result = await axios.post('/api/order/cod', payload)
-        console.log(result.data.message);
-        alert(result.data.message)
+        const res = await axios.post('/api/order/cod', payload)
+
+        alert(res.data.message || 'Order placed successfully!')
         router.push('/orders')
-        setLoading(false)
+        return
+      }
+
+      // 🔥 SSL (bKash / Nagad / Card)
+      if (paymentMethod === 'ssl') {
+        const res = await axios.post('/api/order/ssl', payload)
+
+        if (!res?.data?.url) {
+          throw new Error('Payment URL not found')
+        }
+
+        // ✅ redirect to payment gateway
+        window.location.href = res.data.url
+        return
       }
     } catch (error: any) {
+      console.error(error)
+
+      alert(
+        error?.response?.data?.message ||
+          error.message ||
+          'Something went wrong!',
+      )
+    } finally {
       setLoading(false)
-      alert(error.response.data.message)
     }
   }
-
   // get products
   useEffect(() => {
     if (!productId) {
@@ -65,7 +102,7 @@ export default function Checkout() {
       try {
         const result = await axios.get('/api/user/cart/get')
 
-        const foundItem = result.data.cart.find(
+        const foundItem = result?.data?.cart?.find(
           (i: any) => i.product._id.toString() === productId.toString(),
         )
 
@@ -77,7 +114,7 @@ export default function Checkout() {
           setPaymentMethod('stripe')
         }
       } catch (error: any) {
-        alert(error.response.data.message)
+        alert(error?.response?.data?.message)
       }
     }
     loadItem()
@@ -211,6 +248,14 @@ export default function Checkout() {
                 <FaStripe className='text-xl' />
                 Stripe
               </motion.button>
+              <motion.button
+                onClick={() => setPaymentMethod('ssl')}
+                className={`flex-1 py-3 rounded-xl font-semibold ${
+                  paymentMethod === 'ssl' ? 'bg-blue-600' : 'bg-white/10'
+                }`}
+              >
+                bKash / Nagad
+              </motion.button>
             </div>
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -219,9 +264,13 @@ export default function Checkout() {
               disabled={loading}
               className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 py-4 rounded-2xl font-bold text-lg transition'
             >
-              {loading? <ClipLoader size={20} color='white'/> : paymentMethod === 'cod'
-                ? 'Place Order'
-                : 'Proceed to Secure Payment'}
+              {loading ? (
+                <ClipLoader size={20} color='white' />
+              ) : paymentMethod === 'cod' ? (
+                'Place Order'
+              ) : (
+                'Pay with bKash / Nagad'
+              )}
             </motion.button>
           </div>
         </div>
