@@ -1,18 +1,19 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function SuccessPage() {
-  const params = useSearchParams()
+function SuccessContent() {
+  const searchParams = useSearchParams()
+  const transactionId = searchParams.get('transactionId')
 
-  const tran_id = params.get('tran_id')
+  return <div>Payment Success: {transactionId}</div>
+}
 
+export default function Page() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-green-500 text-3xl">
-      ✅ Payment Successful!
-      <p className="text-sm text-white mt-4">
-        Transaction ID: {tran_id}
-      </p>
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   )
 }
