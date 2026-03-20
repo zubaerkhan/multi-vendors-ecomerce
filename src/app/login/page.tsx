@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { TbPlayerTrackNext } from "react-icons/tb";
 import { ClipLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
+export const dynamic = "force-dynamic";
 
 export default function SignIn() {
   const searchParams = useSearchParams();
