@@ -18,7 +18,7 @@ export default function EditVendorDetails() {
   const [gstNumber, setGstNumber] = useState("");
   const [loading, setLoading] = useState(false);
 const router = useRouter()
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
  
     if (!shopName || !shopAddress || !gstNumber) {

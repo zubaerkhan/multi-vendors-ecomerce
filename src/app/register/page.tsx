@@ -21,7 +21,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSingUp = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSingUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {

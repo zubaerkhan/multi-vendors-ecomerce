@@ -17,7 +17,7 @@ export default function SignIn() {
   const session = useSession()
   
 
-  const handleSingIn = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSingIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
