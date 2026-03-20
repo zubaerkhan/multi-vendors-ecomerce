@@ -21,9 +21,10 @@ export default function RootLayout({
       <body>
         <Provider>
           <StoreProvider>
-            <InitUser/>
-            
-            {children}</StoreProvider>
+            <InitUser />
+
+            {children}
+          </StoreProvider>
         </Provider>
       </body>
     </html>

@@ -1,14 +1,16 @@
-import type { NextConfig } from "next";
+// import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  images:{
-    remotePatterns:[
-      {hostname:"lh3.googleusercontent.com"},
-      {hostname:"https://lh3.googleusercontent.com"},
-      {hostname:"res.cloudinary.com"}
-    ]
-  }
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { hostname: 'lh3.googleusercontent.com' },
+      { hostname: 'https://lh3.googleusercontent.com' },
+      { hostname: 'res.cloudinary.com' },
+    ],
+  },
+  experimental: {
+    optimizeCss: false,
+  },
+}
 
-};
-
-export default nextConfig;
+module.exports = nextConfig
