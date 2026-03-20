@@ -3,6 +3,7 @@ import { auth } from "./auth";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
   const publicRoute = [
     "/login",
     "/register",
@@ -14,12 +15,18 @@ export async function proxy(req: NextRequest) {
   if (publicRoute.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
+
   const session = await auth();
+
   if (!session) {
     const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", req.url);
+
+    // ✅ FIX: only pathname
+    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+
     return NextResponse.redirect(loginUrl);
   }
+
   return NextResponse.next();
 }
 

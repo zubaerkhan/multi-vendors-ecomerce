@@ -7,8 +7,17 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { TbPlayerTrackNext } from "react-icons/tb";
 import { ClipLoader } from "react-spinners";
+import { useSearchParams } from "next/navigation";
 
 export default function SignIn() {
+  const searchParams = useSearchParams();
+  // 🔥 FIX: only pathname extract
+let callbackUrl = searchParams.get("callbackUrl") || "/";
+
+if (callbackUrl.startsWith("http")) {
+  callbackUrl = new URL(callbackUrl).pathname;
+}
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,24 +26,30 @@ export default function SignIn() {
   const session = useSession()
   
 
-  const handleSingIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        //auto redirect false
-        redirect: false,
-      });
-      alert("Signin successfully");
-      router.push("/");
-      setLoading(false);
-    } catch (error: any) {
-      alert(error?.response?.data?.message)
-    }
-  };
+ const handleSingIn = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
 
+  try {
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl, // ✅ এখানে add করো
+    });
+
+    if (res?.ok) {
+      router.push(callbackUrl); // ✅ এখানে use করো
+    } else {
+      alert("Invalid credentials");
+    }
+
+  } catch (error: any) {
+    alert(error?.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-6">
       <AnimatePresence>
