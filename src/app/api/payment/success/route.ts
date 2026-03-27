@@ -31,9 +31,14 @@ export async function POST(req: NextRequest) {
       },
     )
 
-    return NextResponse.redirect(
-      new URL('/payment/success?status=success', process.env.BASE_URL),
-    )
+  return new Response(
+  `<html>
+    <head>
+      <meta http-equiv="refresh" content="0;url=${process.env.BASE_URL}/payment/success" />
+    </head>
+  </html>`,
+  { headers: { "Content-Type": "text/html" } }
+)
 
   } catch (error) {
     console.error(error)
