@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import connectDB from "@/lib/connectDB"
-import Order from "@/model/order.model"
-import { Payment } from "@/model/payment.model"
-
+import { NextRequest, NextResponse } from 'next/server'
+import connectDB from '@/lib/connectDB'
+import Order from '@/model/order.model'
+import { Payment } from '@/model/payment.model'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,37 +10,37 @@ export async function POST(req: NextRequest) {
     const body = await req.formData()
     const data = Object.fromEntries(body)
 
-    console.log("SSL SUCCESS:", data)
+    console.log('SSL SUCCESS:', data)
 
     const tranId = data.tran_id
 
     await Payment.findOneAndUpdate(
       { tranId },
-      {  
-        status: "SUCCESS",
+      {
+        status: 'SUCCESS',
         gatewayResponse: data,
-      }
+      },
     )
 
     await Order.findOneAndUpdate(
       { tranId },
       {
         isPaid: true,
-        paymentStatus: "paid",
-        orderStatus: "confirmed",
-      }
+        paymentStatus: 'paid',
+        orderStatus: 'confirmed',
+      },
     )
 
     return NextResponse.redirect(
-      `${process.env.BASE_URL}/payment/success`
+      new URL('/payment/success?status=success', process.env.BASE_URL),
     )
 
   } catch (error) {
     console.error(error)
 
     return NextResponse.json(
-      { message: "Success handler error" },
-      { status: 500 }
+      { message: 'Success handler error' },
+      { status: 500 },
     )
   }
 }

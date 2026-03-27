@@ -1,7 +1,22 @@
-export default function SuccessPage() {
+'use client'
+
+import { useSearchParams } from 'next/navigation'
+
+export default function FailPage() {
+  const params = useSearchParams()
+  const status = params.get('status')
+
   return (
-    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white flex items-center justify-center px-4 py-12'>
-       <h1 className="text-4xl">✅ Payment Success</h1>
+    <div className="p-10 text-center">
+      <h1 className="text-2xl font-bold text-red-600">
+        Payment Success ✅
+      </h1>
+
+      {status && (
+        <p className="mt-2 text-gray-600">
+          Your payment was completed.
+        </p>
+      )}
     </div>
   )
 }
