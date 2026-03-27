@@ -32,9 +32,14 @@ export async function POST(req: NextRequest) {
       }
     )
 
-    return NextResponse.redirect(
-      new URL("/payment/fail", process.env.BASE_URL)
-    )
+     return new Response(
+  `<html>
+    <head>
+      <meta http-equiv="refresh" content="0;url=${process.env.BASE_URL}/payment/fail" />
+    </head>
+  </html>`,
+  { headers: { "Content-Type": "text/html" } }
+)
 
   } catch (error) {
     console.error("FAIL ROUTE ERROR:", error)

@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
-import connectDB from "@/lib/connectDB"
-import Order from "@/model/order.model"
+import { NextRequest, NextResponse } from 'next/server'
+import connectDB from '@/lib/connectDB'
+import Order from '@/model/order.model'
 
 export async function POST(req: NextRequest) {
   await connectDB()
@@ -13,12 +13,21 @@ export async function POST(req: NextRequest) {
   await Order.findOneAndUpdate(
     { tranId },
     {
-      paymentStatus: "cancelled",
-      orderStatus: "cancelled",
-    }
+      paymentStatus: 'cancelled',
+      orderStatus: 'cancelled',
+    },
   )
 
-  return NextResponse.redirect(
-    new URL("/payment/cancel", process.env.BASE_URL)
+  // return NextResponse.redirect(
+  //   new URL("/payment/cancel", process.env.BASE_URL)
+  // )
+
+  return new Response(
+    `<html>
+    <head>
+      <meta http-equiv="refresh" content="0;url=${process.env.BASE_URL}/payment/cancel" />
+    </head>
+  </html>`,
+    { headers: { 'Content-Type': 'text/html' } },
   )
 }
