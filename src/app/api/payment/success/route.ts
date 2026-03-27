@@ -1,38 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server'
-import connectDB from '@/lib/connectDB'
-import Order from '@/model/order.model'
+import { NextRequest, NextResponse } from "next/server"
+import connectDB from "@/lib/connectDB"
+import Order from "@/model/order.model"
+import { Payment } from "@/model/payment.model"
+
 
 export async function POST(req: NextRequest) {
-  await connectDB()
+  try {
+    await connectDB()
 
-  const formData = await req.formData()
+    const body = await req.formData()
+    const data = Object.fromEntries(body)
 
-  const tran_id = formData.get('tran_id')
-  const val_id = formData.get('val_id')
+    console.log("SSL SUCCESS:", data)
 
-  // 🔐 SSL VALIDATION
-  const validationURL = `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${process.env.SSLCOMMERZ_STORE_ID}&store_passwd=${process.env.SSLCOMMERZ_STORE_PASSWORD}&format=json`
+    const tranId = data.tran_id
 
-  const res = await fetch(validationURL)
-  const data = await res.json()
+    await Payment.findOneAndUpdate(
+      { tranId },
+      {  
+        status: "SUCCESS",
+        gatewayResponse: data,
+      }
+    )
 
-  if (data.status === 'VALID') {
     await Order.findOneAndUpdate(
-      { tran_id },
-      { status: 'paid' }
+      { tranId },
+      {
+        isPaid: true,
+        paymentStatus: "paid",
+        orderStatus: "confirmed",
+      }
     )
 
     return NextResponse.redirect(
       `${process.env.BASE_URL}/payment/success`
     )
-  } else {
-    await Order.findOneAndUpdate(
-      { tran_id },
-      { status: 'failed' }
-    )
 
-    return NextResponse.redirect(
-      `${process.env.BASE_URL}/payment/fail`
+  } catch (error) {
+    console.error(error)
+
+    return NextResponse.json(
+      { message: "Success handler error" },
+      { status: 500 }
     )
   }
 }

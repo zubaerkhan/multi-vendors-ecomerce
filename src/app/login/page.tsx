@@ -7,7 +7,6 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
 import { TbPlayerTrackNext } from 'react-icons/tb'
 import { ClipLoader } from 'react-spinners'
-import { useSearchParams } from 'next/navigation'
 
 export default function SignIn() {
   let callbackUrl = '/'

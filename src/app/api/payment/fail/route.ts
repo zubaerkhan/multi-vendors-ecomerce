@@ -1,19 +1,47 @@
+import { NextRequest, NextResponse } from "next/server"
 import connectDB from "@/lib/connectDB"
 import Order from "@/model/order.model"
-import { NextRequest, NextResponse } from "next/server"
+import { Payment } from "@/model/payment.model"
 
 export async function POST(req: NextRequest) {
-  await connectDB()
+  try {
+    await connectDB()
 
-  const formData = await req.formData()
-  const tran_id = formData.get('tran_id')
+    const body = await req.formData()
+    const data = Object.fromEntries(body)
 
-  await Order.findOneAndUpdate(
-    { tran_id },
-    { status: 'failed' }
-  )
+    console.log("SSL FAIL:", data)
 
-  return NextResponse.redirect(
-    `${process.env.BASE_URL}/payment/fail`
-  )
+    const tranId = data.tran_id
+
+    // ❌ update payment
+    await Payment.findOneAndUpdate(
+      { tranId },
+      {
+        status: "FAILED",
+        gatewayResponse: data,
+      }
+    )
+
+    // ❌ update order
+    await Order.findOneAndUpdate(
+      { tranId },
+      {
+        paymentStatus: "failed",
+        orderStatus: "cancelled",
+      }
+    )
+
+    return NextResponse.redirect(
+      new URL("/payment/fail", process.env.BASE_URL)
+    )
+
+  } catch (error) {
+    console.error("FAIL ROUTE ERROR:", error)
+
+    return NextResponse.json(
+      { message: "Payment fail handler error" },
+      { status: 500 }
+    )
+  }
 }

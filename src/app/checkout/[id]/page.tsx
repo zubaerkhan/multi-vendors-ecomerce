@@ -22,14 +22,13 @@ export default function Checkout() {
   const [city, setCity] = useState('')
   const [pincode, setPincode] = useState('')
   const [loading, setLoading] = useState(false)
-  const totalPrice = item?.product?.price * item?.quantity
+  const productsTotalPrice = item?.product?.price * item?.quantity
   const deliveryCharge = item?.product.freeDelivery ? 0 : 50
   const serviceCharge = 30
-  const finalTotalPrice = totalPrice + deliveryCharge + serviceCharge
+  const totalAmount = productsTotalPrice + deliveryCharge + serviceCharge
   const codDisabled = !item?.product?.payOnDelivery
 
   const handlePlaceOrder = async () => {
-    // ✅ Validation
     if (!name || !phone || !address || !city || !pincode) {
       alert('Please fill out all address fields!')
       return
@@ -40,7 +39,6 @@ export default function Checkout() {
       return
     }
 
-    // ✅ Payload
     const payload = {
       productId,
       quantity: item.quantity,
@@ -51,7 +49,8 @@ export default function Checkout() {
         city,
         pincode,
       },
-      amount: finalTotalPrice,
+      productsTotalPrice,
+      totalAmount,
       deliveryCharge,
       serviceCharge,
     }
@@ -59,7 +58,7 @@ export default function Checkout() {
     try {
       setLoading(true)
 
-      // 🔥 COD FLOW
+      // ✅ COD
       if (paymentMethod === 'cod') {
         const res = await axios.post('/api/order/cod', payload)
 
@@ -68,18 +67,21 @@ export default function Checkout() {
         return
       }
 
-      // 🔥 SSL (bKash / Nagad / Card)
+      // ✅ SSL
       if (paymentMethod === 'ssl') {
         const res = await axios.post('/api/order/ssl', payload)
-
-        if (!res?.data?.url) {
-          throw new Error('Payment URL not found')
-        }
-
-        // ✅ redirect to payment gateway
+        console.log(res.data)
         window.location.href = res.data.url
         return
       }
+
+      // ✅ STRIPE
+      // if (paymentMethod === 'stripe') {
+      //   const res = await axios.post('/api/order/stripe', payload)
+
+      //   window.location.href = res.data.url
+      //   return
+      // }
     } catch (error: any) {
       console.error(error)
 
@@ -201,7 +203,7 @@ export default function Checkout() {
               </p>
               <p className='font-bold text-green-400'>
                 Total ={' '}
-                {totalPrice.toLocaleString('en-BD', {
+                {productsTotalPrice.toLocaleString('en-BD', {
                   style: 'currency',
                   currency: 'BDT',
                 })}
@@ -220,7 +222,7 @@ export default function Checkout() {
             <div className='flex justify-between border-t border-white/20 text-white font-bold text-lg'>
               <span>Total:</span>
               <span className='text-green-400'>
-                {finalTotalPrice.toLocaleString('en-BD', {
+                {totalAmount.toLocaleString('en-BD', {
                   style: 'currency',
                   currency: 'BDT',
                 })}

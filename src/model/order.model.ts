@@ -15,7 +15,9 @@ export interface IOrder {
   deliveryCharge: number
   serviceCharge: number
   totalAmount: number
-  paymentMethod: 'cod' | 'stripe'
+  paymentMethod: 'cod' | 'stripe' | 'ssl'
+  paymentStatus: 'pending' | 'paid' | 'failed'
+  tranId: string
   isPaid: boolean
   orderStatus:
     | 'pending'
@@ -98,11 +100,16 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       type: Number,
       required: true,
     },
-
-    paymentMethod: {
+    tranId: {
       type: String,
-      enum: ['cod', 'stripe'],
       required: true,
+      unique: true,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
     },
 
     isPaid: {
@@ -136,11 +143,6 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       address: { type: String, required: true },
       city: { type: String, required: true },
       pincode: { type: String, required: true },
-    },
-
-    paymentDetails: {
-      stripePaymentId: String,
-      stripeSessionId: String,
     },
 
     deliverDate: { type: Date },
