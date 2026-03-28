@@ -16,55 +16,93 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
+    const items = body.items || []
 
-    const product = await Product.findById(body.productId)
-    if (!product) {
-      return NextResponse.json({ message: 'Product not found' })
+    if (!items.length) {
+      return NextResponse.json({ message: 'No items found' }, { status: 400 })
     }
 
     const tran_id = uuidv4()
 
-    const productsTotalPrice = product.price * body.quantity
+    // ✅ get all products
+    const productIds = items.map((i: any) => i.productId)
+    const products = await Product.find({ _id: { $in: productIds } })
+    // console.log("products",products)
+    // ✅ prepare order products
+    const orderProducts = items.map((i: any) => {
+      const product = products.find((p) => p._id.toString() === i.productId)
+
+      return {
+        product: product._id,
+        quantity: i.quantity,
+        price: product.price,
+      }
+    })
+
+    const productsTotalPrice = orderProducts.reduce(
+      (acc: any, p: any) => acc + p.price * p.quantity,
+      0,
+    )
+
     const totalAmount =
       productsTotalPrice + body.deliveryCharge + body.serviceCharge
 
-    // ✅ Create Order
-    const order = await Order.create({
-      products: [
-        {
-          product: product._id,
-          quantity: body.quantity,
-          price: product.price,
-        },
-      ],
-      buyer: session.user.id,
-      productVendor: product.vendor,
-      productsTotalPrice,
-      deliveryCharge: body.deliveryCharge,
-      serviceCharge: body.serviceCharge,
-      totalAmount,
-      paymentMethod: 'ssl',
-      tranId: tran_id,
-      address: body.address,
-    })
+    // ✅ create order
+    const groupedByVendor: any = {}
 
-    // ✅ Create Payment
+    orderProducts.forEach((item: any) => {
+      const vendor = products
+        .find((p) => p._id.toString() === item.product.toString())
+        .vendor.toString()
+
+      if (!groupedByVendor[vendor]) {
+        groupedByVendor[vendor] = []
+      }
+
+      groupedByVendor[vendor].push(item)
+    })
+    // console.log("groupedByVendor", groupedByVendor)
+    const createdOrders = []
+
+    for (const vendor in groupedByVendor) {
+      const vendorProducts = groupedByVendor[vendor]
+
+      const vendorTotal = vendorProducts.reduce(
+        (acc:any, p:any) => acc + p.price * p.quantity,
+        0,
+      )
+
+      const order = await Order.create({
+        products: vendorProducts,
+        buyer: session.user.id,
+        productVendor: vendor,
+        productsTotalPrice: vendorTotal,
+        deliveryCharge: 0,
+        serviceCharge: 0,
+        totalAmount: vendorTotal,
+        paymentMethod: 'ssl',
+        tranId: tran_id,
+        address: body.address,
+      })
+
+      createdOrders.push(order)
+    }
+
+    // ✅ payment
     await Payment.create({
-      orderId: order._id,
+      orderIds: createdOrders.map(o => o._id),
       tranId: tran_id,
       amount: totalAmount,
       currency: 'BDT',
       paymentMethod: 'ssl',
       status: 'INITIATED',
-      cusName: body.address.name,
-      cusPhone: body.address.phone,
     })
 
-    // ✅ 3. SSL request
+    // ✅ SSL request
     const data = new URLSearchParams({
       store_id: process.env.SSLCOMMERZ_STORE_ID!,
       store_passwd: process.env.SSLCOMMERZ_STORE_PASSWORD!,
-      total_amount: body.totalAmount.toString(),
+      total_amount: totalAmount.toString(),
       currency: 'BDT',
       tran_id,
 
@@ -72,7 +110,8 @@ export async function POST(req: NextRequest) {
       fail_url: `${process.env.BASE_URL}/api/payment/fail`,
       cancel_url: `${process.env.BASE_URL}/api/payment/cancel`,
       ipn_url: `${process.env.BASE_URL}/api/payment/ipn`,
-      product_name: 'Product',
+
+      product_name: 'Multi Product Order',
       product_category: 'Ecommerce',
       product_profile: 'general',
 
@@ -97,13 +136,6 @@ export async function POST(req: NextRequest) {
     )
 
     const result = await response.json()
-
-    if (!result.GatewayPageURL) {
-      return NextResponse.json(
-        { message: 'SSLCommerz error', error: result },
-        { status: 400 },
-      )
-    }
 
     return NextResponse.json({
       url: result.GatewayPageURL,

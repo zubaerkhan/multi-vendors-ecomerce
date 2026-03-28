@@ -3,16 +3,17 @@
 import axios from 'axios'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaStripe } from 'react-icons/fa'
 import { ClipLoader } from 'react-spinners'
 
 export default function Checkout() {
-  const params = useParams()
-  const productId = params.id as string
+  const searchParams = useSearchParams()
+  const selectedIds = searchParams.get('items')?.split(',') || []
   const router = useRouter()
-  const [item, setItem] = useState<any>(null)
+  const [items, setItems] = useState<any[]>([])
+
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe' | 'ssl'>(
     'cod',
   )
@@ -22,11 +23,21 @@ export default function Checkout() {
   const [city, setCity] = useState('')
   const [pincode, setPincode] = useState('')
   const [loading, setLoading] = useState(false)
-  const productsTotalPrice = item?.product?.price * item?.quantity
-  const deliveryCharge = item?.product.freeDelivery ? 0 : 50
+  const productsTotalPrice = items.reduce(
+    (acc, item) => acc + item.product.price * item.quantity,
+    0,
+  )
+  const deliveryCharge = items.some((i) => !i.product.freeDelivery) ? 50 : 0
   const serviceCharge = 30
   const totalAmount = productsTotalPrice + deliveryCharge + serviceCharge
-  const codDisabled = !item?.product?.payOnDelivery
+
+  const codDisabled = items.some((item) => !item.product.payOnDelivery)
+
+  useEffect(() => {
+    if (codDisabled) {
+      setPaymentMethod('ssl')
+    }
+  }, [codDisabled, items.length])
 
   const handlePlaceOrder = async () => {
     if (!name || !phone || !address || !city || !pincode) {
@@ -34,14 +45,11 @@ export default function Checkout() {
       return
     }
 
-    if (!item) {
-      alert('Product not found!')
-      return
-    }
-
     const payload = {
-      productId,
-      quantity: item.quantity,
+      items: items.map((i) => ({
+        productId: i.product._id,
+        quantity: i.quantity,
+      })),
       address: {
         name,
         phone,
@@ -96,33 +104,32 @@ export default function Checkout() {
   }
   // get products
   useEffect(() => {
-    if (!productId) {
-      alert('product is not found')
-      return
-    }
-    const loadItem = async () => {
+    const loadItems = async () => {
       try {
         const result = await axios.get('/api/user/cart/get')
 
-        const foundItem = result?.data?.cart?.find(
-          (i: any) => i.product._id.toString() === productId.toString(),
+        const cartItems = result?.data?.cart || []
+
+        if (!cartItems.length) {
+          router.replace('/cart')
+          return
+        }
+        // 💡 মনে রাখবে: যখন তুমি .populate("cart.product") করবে, তখন cart.product full product document হিসেবে আসবে এবং তার _id, title, price, images access করতে পারবে।
+
+        const filtered = cartItems.filter((item: any) =>
+          selectedIds.includes(item.product._id),
         )
 
-        if (!foundItem) {
-          router.replace('/cart')
-        }
-        setItem(foundItem)
-        if (!foundItem.product.payOnDelivery) {
-          setPaymentMethod('stripe')
-        }
+        setItems(filtered)
       } catch (error: any) {
         alert(error?.response?.data?.message)
       }
     }
-    loadItem()
-  }, [productId])
 
-  if (!item) {
+    loadItems()
+  }, [])
+
+  if (!items.length) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-black text-white text-4xl'>
         Loading...
@@ -181,35 +188,45 @@ export default function Checkout() {
         </div>
         <div className='space-y-5'>
           <h2 className='text-2xl font-bold text-white'>Order Summary</h2>
-          <div className='flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10'>
-            {item?.product?.images && (
-              <Image
-                src={item?.product?.images[0]}
-                alt='Product image'
-                width={120}
-                height={120}
-                className='w-20 h-20 object-contain rounded-lg bg-white'
-              />
-            )}
-            <div>
-              <p className='font-semibold text-gray-100'>
-                {item?.product?.title}
-              </p>
-              <p className='text-sm text-gray-400'>
-                <b>Price :</b> {item?.product?.price} TK
-              </p>
-              <p className='text-sm text-gray-400'>
-                <b>Qty :</b> {item?.quantity}
-              </p>
-              <p className='font-bold text-green-400'>
-                Total ={' '}
-                {productsTotalPrice.toLocaleString('en-BD', {
-                  style: 'currency',
-                  currency: 'BDT',
-                })}
-              </p>
-            </div>
+          <div className=' gap-4 bg-white/5 p-4 rounded-xl border border-white/10'>
+            {items.map((item: any, i) => (
+              <div
+                key={i}
+                className='flex space-x-2 mb-2 border-t border-white/20 p-1'
+              >
+                <Image
+                  src={item?.product?.images[0]}
+                  alt='Product image'
+                  width={120}
+                  height={120}
+                  className='w-20 h-20 object-contain rounded-lg bg-white'
+                />
+
+                <div>
+                  <p className='font-semibold text-gray-100'>
+                    {item?.product?.title}
+                  </p>
+                  <p className='text-sm text-gray-400'>
+                    <b>Price :</b> {item?.product?.price} TK
+                  </p>
+                  <p className='text-sm text-gray-400'>
+                    <b>Qty :</b> {item?.quantity}
+                  </p>
+                  <p className='font-bold text-green-400'>
+                    Total ={' '}
+                    {(item?.product?.price * item?.quantity).toLocaleString(
+                      'en-BD',
+                      {
+                        style: 'currency',
+                        currency: 'BDT',
+                      },
+                    )}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
+
           <div className='space-y-2 text-sm text-gray-300'>
             <div className='flex justify-between'>
               <span>Delivery Charge</span>

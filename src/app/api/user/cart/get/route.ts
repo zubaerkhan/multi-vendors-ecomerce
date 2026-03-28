@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     if (!session || !session?.user?.email || !session?.user.id) {
       return NextResponse.json(
         { message: 'UnAuthorized User' },
-        { status: 400 },
+        { status: 401 },
       )
     }
  

@@ -48,7 +48,10 @@ export default function Orders() {
   }
 
   const isCancelDisable = (order: any) => {
-    return order.isPaid === true && order.paymentMethod === 'stripe'
+    return (
+      order.isPaid === true &&
+      (order.paymentMethod === 'stripe' || order.paymentMethod === 'ssl')
+    )
   }
   const statusList = ['pending', 'confirmed', 'shipped', 'delivered']
   // track step start
@@ -57,7 +60,7 @@ export default function Orders() {
     return (
       <div className='relative pl-6 '>
         {/* vertical line */}
-        <div className='absolute left-7.5 top-0 h-full w-[2px] bg-gray-700'></div>
+        <div className='absolute left-[31px] top-0 h-full w-[2px] bg-gray-700'></div>
         <div>
           {statusList.map((step, index) => {
             const completed = index <= currentIndex
@@ -69,7 +72,7 @@ export default function Orders() {
                 <div
                   className={`
                 w-4 h-4 rounded-full mt-1 z-10
-                ${completed ? 'bg-blue-500' : 'bg-gray-500'}
+                ${completed ? 'bg-green-600' : 'bg-white/70'}
                 ${current ? 'ring-4 ring-blue-500/30' : ''}
               `}
                 />
@@ -82,7 +85,7 @@ export default function Orders() {
               `}
                 >
                   {step.toUpperCase()}
-                  <span>{completed ? '✓' : ''}</span>
+                  <span className='text-red-400'>{completed ? '✓' : ''}</span>
                 </div>
               </div>
             )
@@ -206,16 +209,14 @@ export default function Orders() {
                       {order.productVendor.shopName}
                     </td>
                     <td className='p-4 text-sm text-center'>
-                      {order.paymentMethod.toUpperCase()}{' '}
+                      {order.paymentMethod}{' '}
                       <div
                         className={`text-xs ${order.isPaid ? 'text-green-300' : 'text-yellow-300'}`}
                       >
                         {order.isPaid ? 'paid' : 'Pending'}
                       </div>
                     </td>
-                    <td className='p-4 text-sm '>
-                      {order.orderStatus.toUpperCase()}
-                    </td>
+                    <td className='p-4 text-sm '>{order.orderStatus}</td>
                     <td className='p-4 text-right text-green-300 font-semibold'>
                       {order.totalAmount.toLocaleString('en-BD', {
                         style: 'currency',
@@ -232,7 +233,7 @@ export default function Orders() {
                         <span className='text-orange-400 font-semibold flex flex-col justify-center'>
                           Returned
                           <span className='text-nowrap'>
-                            Return amount: {" "}{order.returnedAmount} tk
+                            Return amount: {order.returnedAmount} tk
                           </span>
                         </span>
                       )}
@@ -311,7 +312,7 @@ export default function Orders() {
                 <div className='mt-3 flex justify-between'>
                   <div>
                     <div className='text-md text-gray-400'>
-                      Pyament method: {order.paymentMethod.toUpperCase()}
+                      Pyament method: {order.paymentMethod}
                     </div>
                     <div
                       className={`text-sm font-semibold ${order.isPaid ? 'text-green-400' : 'text-yellow-400'}`}
@@ -339,13 +340,13 @@ export default function Orders() {
                   </span>
                 )}
                 {order.orderStatus === 'returned' && (
-                        <span className='text-orange-400 font-semibold flex flex-col justify-center'>
-                          Returned
-                          <span className='text-nowrap'>
-                            Return amount: {" "}{order.returnedAmount} tk
-                          </span>
-                        </span>
-                      )}
+                  <span className='text-orange-400 font-semibold flex flex-col justify-center'>
+                    Returned
+                    <span className='text-nowrap'>
+                      Return amount: {order.returnedAmount} tk
+                    </span>
+                  </span>
+                )}
                 {order.orderStatus !== 'cancelled' &&
                   order.orderStatus !== 'returned' && (
                     <div className='flex justify-between gap-2 mt-4'>
@@ -387,7 +388,7 @@ export default function Orders() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm overflow-auto'
-            onClick={() => setSelectedOrder(null)}
+            onClick={() => setTrackOrderModel(null)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}

@@ -2,8 +2,7 @@ import mongoose, { Document, Model } from 'mongoose'
 
 // 📌 1. TypeScript Interface
 export interface IPayment extends Document {
-  orderId: mongoose.Types.ObjectId
-
+  orderIds: mongoose.Types.ObjectId[]
   tranId: string
   sessionKey?: string | null
   valId?: string | null
@@ -33,17 +32,17 @@ export interface IPayment extends Document {
 // 📌 2. Schema
 const paymentSchema = new mongoose.Schema<IPayment>(
   {
-    orderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Order',
-      required: true,
-      index: true,
-    },
+    orderIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
+        required: true,
+      },
+    ],
 
     tranId: {
       type: String,
       required: true,
-      unique: true,
       index: true,
     },
 
