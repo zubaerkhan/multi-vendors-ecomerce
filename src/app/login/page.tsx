@@ -1,4 +1,5 @@
 'use client'
+import Navbar from '@/components/Navbar'
 import { AnimatePresence, motion } from 'motion/react'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -49,6 +50,7 @@ export default function SignIn() {
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-6'>
+      <Navbar/>
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: 40 }}

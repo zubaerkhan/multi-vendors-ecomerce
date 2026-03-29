@@ -1,5 +1,6 @@
 'use client'
 
+import Navbar from '@/components/Navbar'
 import axios from 'axios'
 import { motion } from 'motion/react'
 import Image from 'next/image'
@@ -137,7 +138,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white flex items-center justify-center px-4 py-12'>
+    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white flex items-center justify-center px-4 py-12 pt-20'>
+         <Navbar/>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

@@ -1,5 +1,6 @@
 'use client'
 
+import Navbar from '@/components/Navbar'
 import UseGetAllOrders from '@/hooks/UseGetAllOrders'
 import UseGetCurrentUser from '@/hooks/UseGetCurrentUser'
 import { AppDispatch, RootState } from '@/redux/store'
@@ -20,6 +21,7 @@ export default function Orders() {
   )
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
   const [trackOrderModel, setTrackOrderModel] = useState<any | null>(null)
+
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
     const timer = setInterval(() => {
@@ -161,8 +163,10 @@ export default function Orders() {
     }
   }
   return (
-    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white'>
-      <div className='max-w-6xl mx-auto '>
+    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white pt-20'>
+      <Navbar />
+
+      <div className='max-w-6xl mx-auto mt-15 '>
         <div className='mb-6 flex items-center justify-between'>
           <div>
             <h1 className='text-2xl font-bold'>My Orders</h1>
@@ -198,18 +202,26 @@ export default function Orders() {
                     <td className='p-4 text-sm'>
                       {formateDate(String(order.createdAt))}
                     </td>
-                   <td className='p-4'>
-                    <div className='space-y-2'>
-                      {order.products.map((p: any, i) => (
-                        <div key={i} className='border-b border-white/10 pb-1 last:border-b-0'>
-                          <div>{p?.product?.title}</div>
-                          <div className='text-xs text-gray-400'>
-                            Qty: {p.quantity}
+                    <td className='p-4'>
+                      <div className='space-y-2'>
+                        {order.products.map((p: any, i) => (
+                          <div
+                            key={i}
+                            className='border-b border-white/10 pb-1 last:border-b-0'
+                          >
+                            <div>
+                              {' '}
+                              <span className='text-gray-400'>
+                                {i + 1}
+                              </span>. {p?.product?.title}
+                            </div>
+                            <div className='text-xs text-gray-400'>
+                              Qty: {p.quantity}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </td>
+                        ))}
+                      </div>
+                    </td>
                     <td className='p-4 text-sm'>
                       {order.productVendor.shopName}
                     </td>
@@ -333,11 +345,23 @@ export default function Orders() {
                   </div>
                 </div>
                 <div className='mt-3 space-y-1'>
-                  {order.products.map((p, i) => (
-                    <div key={i} className='text-gray-200 text-sm'>
-                      {p.product.title} - Qty ({p.quantity})
-                    </div>
-                  ))}
+                  <div className='space-y-2'>
+                    {order.products.map((p: any, i) => (
+                      <div
+                        key={i}
+                        className='border-b border-white/10 pb-1 last:border-b-0'
+                      >
+                        <div>
+                          {' '}
+                          <span className='text-gray-400'>{i + 1}</span>.{' '}
+                          {p?.product?.title}
+                        </div>
+                        <div className='text-xs text-gray-400'>
+                          Qty: {p.quantity}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 {order.orderStatus === 'cancelled' && (
                   <span className='text-red-400 font-semibold flex justify-end'>
@@ -419,9 +443,12 @@ export default function Orders() {
                   className='flex justify-between bg-white/5 p-3 rounded mb-2 '
                 >
                   <div>
-                    <div className='font-medium'>{p.product.title}</div>
+                    <div className='font-medium'>
+                      <span className='text-gray-400'>{i + 1}</span>.{' '}
+                      {p.product.title}
+                    </div>
                     <div className=''>
-                      Qty: {p.quantity} - Price :{' '}
+                      Qty: {p.quantity}, Price :{' '}
                       {p.price.toLocaleString('en-BD', {
                         style: 'currency',
                         currency: 'BDT',
@@ -508,7 +535,79 @@ export default function Orders() {
                   </div>
                 )}
               <div className='flex flex-col md:flex-row justify-end gap-3 mt-6'>
-                <button
+                
+                {selectedOrder.orderStatus !== 'delivered' ? (
+                  <button
+                    onClick={() => handleCancel(selectedOrder._id)}
+                    className={`px-4 py-2 bg-blue-500 rounded transition ${isCancelDisable(selectedOrder) ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+                  >
+                    Cancel Order
+                  </button>
+                ) : (
+                  <div>
+                    {selectedOrder.products.map((p: any, i: number) => {
+                      const replacementDays = p.product.replacementDays || 0
+                      const eligible = isEligibleReturn(
+                        selectedOrder.deliverDate,
+                        replacementDays,
+                      )
+                      const remainingTime = getRemainingTime(
+                        selectedOrder.deliverDate,
+                        replacementDays,
+                      )
+                      const returnEndDate = returnedEndDate(
+                        selectedOrder.deliverDate,
+                        replacementDays,
+                      )
+
+                      return (
+                        <div
+                          key={i}
+                          className='flex justify-between  items-center bg-white/5 px-3 py-2 rounded ml-2 mt-1'
+                        >
+                          <div className=''>
+                            <p className='text-xs text-gray-300 '>
+                              {p.product?.title}
+                            </p>
+                            {remainingTime ? (
+                              <div >
+                                <p className='text-xs text-yellow-400 '>
+                                  Return in {remainingTime.days}d-
+                                  {remainingTime.hours}h-{remainingTime.minutes}
+                                  m-
+                                  {remainingTime.seconds}s
+                                </p>
+
+                                {returnEndDate && (
+                                  <p className='text-[11px] text-gray-400'>
+                                    Return till:{' '}
+                                    {returnEndDate.toLocaleDateString('en-IN')}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className='text-xs text-red-400'>
+                                Return window closed
+                              </p>
+                            )}
+                          </div>
+                          {eligible && (
+                            <button
+                              onClick={() =>
+                                returnOrderHandle(selectedOrder._id)
+                              }
+                              className='mx-3 px-3 py-1 bg-yellow-600 rounded text-sm'
+                            >
+                              Return
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className=' flex gap-2 mt-5 justify-end'><button
                   onClick={() => setSelectedOrder(null)}
                   className='px-4 py-2 bg-red-400 hover:bg-red-500 rounded transition'
                 >
@@ -527,73 +626,7 @@ export default function Orders() {
                   ) : (
                     <span>Track Order</span>
                   )}
-                </button>
-                {selectedOrder.orderStatus !== 'delivered' ? (
-                  <button
-                    onClick={() => handleCancel(selectedOrder._id)}
-                    className={`px-4 py-2 bg-blue-500 rounded transition ${isCancelDisable(selectedOrder) ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
-                  >
-                    Cancel Order
-                  </button>
-                ) : (
-                  selectedOrder.products.map((p: any, i: number) => {
-                    const replacementDays = p.product.replacementDays || 0
-                    const eligible = isEligibleReturn(
-                      selectedOrder.deliverDate,
-                      replacementDays,
-                    )
-                    const remainingTime = getRemainingTime(
-                      selectedOrder.deliverDate,
-                      replacementDays,
-                    )
-                    const returnEndDate = returnedEndDate(
-                      selectedOrder.deliverDate,
-                      replacementDays,
-                    )
-
-                    return (
-                      <div
-                        key={i}
-                        className='flex justify-between  items-center bg-white/5 px-3 py-2 rounded ml-2'
-                      >
-                        <div>
-                          <p className='text-xs text-gray-300 '>
-                            {p.product?.title}
-                          </p>
-                          {remainingTime ? (
-                            <>
-                              <p className='text-xs text-yellow-400 '>
-                                Return in {remainingTime.days}d-
-                                {remainingTime.hours}h-{remainingTime.minutes}m-
-                                {remainingTime.seconds}s
-                              </p>
-
-                              {returnEndDate && (
-                                <p className='text-[11px] text-gray-400'>
-                                  Return till:{' '}
-                                  {returnEndDate.toLocaleDateString('en-IN')}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <p className='text-xs text-red-400'>
-                              Return window closed
-                            </p>
-                          )}
-                        </div>
-                        {eligible && (
-                          <button
-                            onClick={() => returnOrderHandle(selectedOrder._id)}
-                            className='mx-3 px-3 py-1 bg-yellow-600 rounded text-sm'
-                          >
-                            Return
-                          </button>
-                        )}
-                      </div>
-                    )
-                  })
-                )}
-              </div>
+                </button></div>
             </motion.div>
           </motion.div>
         )}

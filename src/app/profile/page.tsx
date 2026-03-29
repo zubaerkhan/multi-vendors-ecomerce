@@ -1,5 +1,6 @@
 'use client'
 
+import Navbar from '@/components/Navbar'
 import UseGetCurrentUser from '@/hooks/UseGetCurrentUser'
 import { AppDispatch, RootState } from '@/redux/store'
 import { setUserData } from '@/redux/userSlice'
@@ -78,6 +79,8 @@ export default function Profile() {
   }
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white px-4 pt-24 pb-10'>
+      
+<Navbar/>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

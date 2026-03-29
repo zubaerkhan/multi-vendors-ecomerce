@@ -1,5 +1,6 @@
 'use client'
 
+import Navbar from '@/components/Navbar'
 import UseGetCurrentUser from '@/hooks/UseGetCurrentUser'
 import axios from 'axios'
 import Image from 'next/image'
@@ -78,7 +79,8 @@ export default function CartPage() {
 
   // ✅ Cart Data
   return (
-    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white '>
+    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white pt-20'>
+      <Navbar />
       <div className=' items-end max-w-5xl mx-auto space-y-4 border border-white/10 p-5 rounded-md'>
         <div>
           {cart.map((item, i) => (

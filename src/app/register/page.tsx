@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import { signIn } from "next-auth/react";
+import Navbar from "@/components/Navbar";
 
 export default function Register() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -45,6 +46,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-6">
+      <Navbar/>
       <AnimatePresence mode="wait">
         {/* for step 01  */}
         {step == 1 && (

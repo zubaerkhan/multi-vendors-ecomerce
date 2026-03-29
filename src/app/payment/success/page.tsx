@@ -1,8 +1,11 @@
 'use client'
 
+import Navbar from "@/components/Navbar"
+
 export default function SuccessPage() {
   return (
-    <div className="p-10 text-center">
+    <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white flex items-center justify-center px-4 py-12 '>
+       <Navbar/>
       <h1 className="text-2xl font-bold text-green-600">
         Payment Successful ✅
       </h1>
