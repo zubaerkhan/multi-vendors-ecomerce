@@ -7,10 +7,17 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaStripe } from 'react-icons/fa'
 import { ClipLoader } from 'react-spinners'
+export const dynamic = 'force-dynamic'
+
 
 export default function Checkout() {
   const searchParams = useSearchParams()
-  const selectedIds = searchParams.get('items')?.split(',') || []
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  useEffect(() => {
+    const ids = searchParams.get('items')?.split(',') || []
+    setSelectedIds(ids)
+  }, [searchParams])
+
   const router = useRouter()
   const [items, setItems] = useState<any[]>([])
 
@@ -23,10 +30,18 @@ export default function Checkout() {
   const [city, setCity] = useState('')
   const [pincode, setPincode] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
   const productsTotalPrice = items.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
     0,
   )
+
   const deliveryCharge = items.some((i) => !i.product.freeDelivery) ? 50 : 0
   const serviceCharge = 30
   const totalAmount = productsTotalPrice + deliveryCharge + serviceCharge
@@ -57,7 +72,7 @@ export default function Checkout() {
         city,
         pincode,
       },
-     
+
       deliveryCharge,
       serviceCharge,
     }
