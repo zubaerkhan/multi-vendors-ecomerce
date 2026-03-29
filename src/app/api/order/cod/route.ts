@@ -4,6 +4,7 @@ import Order from '@/model/order.model'
 import Product from '@/model/product.model'
 import User from '@/model/user.model'
 import { NextRequest, NextResponse } from 'next/server'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,20 +17,16 @@ export async function POST(req: NextRequest) {
       )
     }
     const {
-      productId,
-      quantity,
+      items,
       address,
-      amount,
       deliveryCharge,
       serviceCharge,
     } = await req.json()
 
-    if (!productId || !quantity) {
-      return NextResponse.json(
-        { message: 'Product Id and quantity required' },
-        { status: 400 },
-      )
+    if (!items || !items.length) {
+      return NextResponse.json({ message: 'No items found' }, { status: 400 })
     }
+
     if (
       !address?.name ||
       !address?.phone ||
@@ -43,7 +40,7 @@ export async function POST(req: NextRequest) {
       )
     }
     if (
-      typeof amount !== 'number' ||
+     
       typeof deliveryCharge !== 'number' ||
       typeof serviceCharge !== 'number'
     ) {
@@ -61,72 +58,73 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const cartItem = user.cart.find(
-      (i: any) => i.product.toString() === productId.toString(),
+    // loop করে order products তৈরি
+    const vendorMap: any = {}
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId)
+
+      const vendorId = product.vendor.toString()
+
+      if (!vendorMap[vendorId]) {
+        vendorMap[vendorId] = []
+      }
+
+      vendorMap[vendorId].push({
+        product: product._id,
+        quantity: item.quantity,
+        price: product.price,
+      })
+    }
+
+    const createdOrders = []
+
+    for (const vendorId in vendorMap) {
+      const vendorProducts = vendorMap[vendorId]
+
+      const vendorProductsTotal = vendorProducts.reduce(
+        (acc: number, p: any) => acc + p.price * p.quantity,
+        0,
+      )
+
+      const order = await Order.create({
+        buyer: session.user.id,
+        products: vendorProducts,
+        productVendor: vendorId,
+        productsTotalPrice: vendorProductsTotal,
+        deliveryCharge,
+        serviceCharge,
+        totalAmount: vendorProductsTotal + deliveryCharge + serviceCharge,
+        paymentMethod: 'cod',
+        paymentStatus: 'pending',
+        tranId: uuidv4(),
+        isPaid: false,
+        orderStatus: 'pending',
+        address,
+      })
+
+      createdOrders.push(order)
+    }
+
+    // cart remove selected items
+    const selectedIds = items.map((i: any) => i.productId.toString())
+
+    user.cart = user.cart.filter(
+      (i: any) => !selectedIds.includes(i.product.toString()),
     )
-
-    if (!cartItem) {
-      return NextResponse.json(
-        { message: 'Prduct not found in cart!' },
-        { status: 400 },
-      )
-    }
-    const product = await Product.findById(productId)
-    if (!product) {
-      return NextResponse.json(
-        { message: 'Prduct not found!' },
-        { status: 400 },
-      )
-    }
-    if (product.stock < quantity) {
-      return NextResponse.json(
-        {
-          message: `Insufficient stock. Available Stock:  ${product.stock} items`,
-        },
-        { status: 400 },
-      )
-    }
-
-    const order = await Order.create({
-      buyer: session?.user?.id,
-      products: [
-        {
-          product: product._id,
-          quantity,
-          price: product.price,
-        },
-      ],
-      productVendor: product.vendor,
-      productsTotalPrice: product.price * quantity,
-      deliveryCharge,
-      serviceCharge,
-      totalAmount: amount,
-      paymentMethod: 'cod',
-      isPaid: false,
-      orderStatus: 'pending',
-      returnedAmount: 0,
-      address,
-    })
-    // stock kome jabe
-    await Product.findByIdAndUpdate(productId, {
-      $inc: { stock: -quantity },
-    })
-
-    const updateCart = user.cart.filter(
-      (i: any) => i.product.toString() !== productId.toString(),
-    )
-    user.cart = updateCart
-    user.orders.push(order._id)
-
     await user.save()
 
     return NextResponse.json(
-      { order, updateUser: user, message: 'COD Order placed successfully' },
+      {
+        orders: createdOrders,
+        updateUser: user,
+        message: 'COD Orders placed successfully',
+      },
       { status: 201 },
     )
   } catch (error: any) {
     return NextResponse.json(
-      { message: `Failed to create order ${error}`, },
+      { message: `Failed to create order ${error}` },
       { status: 500 },
     )
   }

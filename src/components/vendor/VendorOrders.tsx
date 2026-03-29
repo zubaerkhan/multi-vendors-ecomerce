@@ -148,11 +148,16 @@ export default function VendorOrders() {
                     </div>
                   </td>
                   <td className='p-4'>
-                    {order.products.map((p: any, i) => (
-                      <div key={i}>
-                        {p.product.title}, Qty-({p.quantity})
-                      </div>
-                    ))}
+                    <div className='space-y-2'>
+                      {order.products.map((p: any, i) => (
+                        <div key={i} className='border-b border-white/10 pb-1 last:border-b-0'>
+                          <div>{p?.product?.title}</div>
+                          <div className='text-xs text-gray-400'>
+                            Qty: {p.quantity}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </td>
                   <td className='p-4'>
                     {order.paymentMethod}

@@ -198,13 +198,18 @@ export default function Orders() {
                     <td className='p-4 text-sm'>
                       {formateDate(String(order.createdAt))}
                     </td>
-                    <td className='p-4 text-sm'>
-                      {order.products.map((p, i) => (
-                        <div key={i} className='text-gray-200'>
-                          {p.product.title} - Qty ({p.quantity})
+                   <td className='p-4'>
+                    <div className='space-y-2'>
+                      {order.products.map((p: any, i) => (
+                        <div key={i} className='border-b border-white/10 pb-1 last:border-b-0'>
+                          <div>{p?.product?.title}</div>
+                          <div className='text-xs text-gray-400'>
+                            Qty: {p.quantity}
+                          </div>
                         </div>
                       ))}
-                    </td>
+                    </div>
+                  </td>
                     <td className='p-4 text-sm'>
                       {order.productVendor.shopName}
                     </td>

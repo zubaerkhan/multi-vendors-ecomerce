@@ -79,7 +79,7 @@ export default function CartPage() {
   // ✅ Cart Data
   return (
     <div className='min-h-screen  bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 p-6 text-white '>
-      <div className='flex flex-col items-end max-w-5xl mx-auto space-y-4 border border-white/10 p-5 rounded-md'>
+      <div className=' items-end max-w-5xl mx-auto space-y-4 border border-white/10 p-5 rounded-md'>
         <div>
           {cart.map((item, i) => (
             <div
@@ -146,7 +146,7 @@ export default function CartPage() {
             </div>
           ))}
         </div>
-        <div>
+        <div className='flex justify-end'>
           <button
             onClick={() => {
               if (selectedItems.length === 0) {

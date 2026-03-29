@@ -57,8 +57,7 @@ export default function Checkout() {
         city,
         pincode,
       },
-      productsTotalPrice,
-      totalAmount,
+     
       deliveryCharge,
       serviceCharge,
     }
