@@ -107,7 +107,7 @@ export default function VendorOrders() {
     }
   }
   return (
-    <div className='w-full px-3 py-10 sm:px-6 lg:px-1 text-white'>
+    <div className='w-full px-3 py-10 sm:px-6 lg:px-1 text-white pt-20'>
       <div className='flex items-center justify-between'>
         <h1 className='text-xl sm:text-2xl lg:text-3xl font-bold mb-6'>
           Vendor Orders

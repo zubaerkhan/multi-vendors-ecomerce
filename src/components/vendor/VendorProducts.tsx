@@ -46,7 +46,7 @@ export default function VendorProducts() {
     }
   }
   return (
-    <div className='w-full px-3 py-15 sm:px-6 lg:px-1  text-white'>
+    <div className='w-full px-3 py-15 sm:px-6 lg:px-1  text-white pt-20'>
       {/* header  */}
       <div className='flex justify-between items-center mb-6'>
         <h1 className='text-2xl sm:text-3xl font-bold'> My Products</h1>

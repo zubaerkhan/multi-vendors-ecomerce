@@ -100,6 +100,11 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       type: Number,
       required: true,
     },
+    paymentMethod: {
+      type: String,
+      enum: ['cod', 'stripe', 'ssl'],
+      required: true,
+    },
     tranId: {
       type: String,
       required: true,
@@ -111,7 +116,7 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       enum: ['pending', 'paid', 'failed'],
       default: 'pending',
     },
-
+    
     isPaid: {
       type: Boolean,
       default: false,

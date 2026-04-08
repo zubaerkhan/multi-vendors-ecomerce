@@ -4,9 +4,11 @@ import slide2 from "@/assets/slider2.png";
 import slide3 from "@/assets/slider3.png";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Slider() {
+  const router =  useRouter()
   const [current, setCurrent] = useState(0);
   const slides = [
     {
@@ -82,6 +84,7 @@ export default function Slider() {
               {slides[current].title}
             </motion.p>
             <motion.button
+            onClick={()=>router.push("/category")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-lg transition"

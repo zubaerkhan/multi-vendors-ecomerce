@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
       })
 
       createdOrders.push(order)
+      console.log(order)
     }
 
     // ✅ payment

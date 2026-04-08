@@ -509,41 +509,47 @@ export default function Orders() {
                   </div>
                 )}
 
-              {selectedOrder.isPaid == true &&
-                selectedOrder.paymentMethod == 'stripe' && (
-                  <div className='bg-yellow-500/10 border-yellow-500/30 text-yellow-300 text-xs rounded-lg p-3 mt-4'>
-                    <p className='font-semibold mb-1'>Imortant Note:</p>
-                    <ul className='list-disc pl-4 space-y-1'>
+              {selectedOrder.isPaid === true &&
+                selectedOrder.paymentMethod === 'ssl' && (
+                  <div className='mt-4 rounded-xl border border-yellow-400/30 bg-gradient-to-br from-yellow-500/10 to-yellow-400/5 p-4 text-sm text-yellow-200 shadow-sm backdrop-blur'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='text-yellow-400 text-lg'>⚠️</span>
+                      <p className='font-semibold text-yellow-300'>
+                        Important Note
+                      </p>
+                    </div>
+
+                    <ul className='list-disc pl-5 space-y-1 leading-relaxed'>
                       <li>
-                        Order cancellation feature is{' '}
-                        <b>
-                          not available if payment is done using online payment
-                          (Stripe)
-                        </b>
+                        Order cancellation is{' '}
+                        <span className='font-semibold text-yellow-100'>
+                          not available for online payments (SSL/Stripe)
+                        </span>
                       </li>
+
                       <li>
-                        You can only <b>return the product </b> after delivery.
+                        You can only{' '}
+                        <span className='font-semibold text-yellow-100'>
+                          return the product
+                        </span>{' '}
+                        after delivery
                       </li>
+
                       <li>
                         On return, you will receive only the{' '}
-                        <b>product amount</b>
+                        <span className='font-semibold text-yellow-100'>
+                          product amount
+                        </span>
                       </li>
-                      <li>
-                        <b>Delivery & service Charge are non-refundable.</b>
+
+                      <li className='text-red-300 font-medium'>
+                        Delivery & service charges are non-refundable
                       </li>
                     </ul>
                   </div>
                 )}
               <div className='flex flex-col md:flex-row justify-end gap-3 mt-6'>
-                
-                {selectedOrder.orderStatus !== 'delivered' ? (
-                  <button
-                    onClick={() => handleCancel(selectedOrder._id)}
-                    className={`px-4 py-2 bg-blue-500 rounded transition ${isCancelDisable(selectedOrder) ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
-                  >
-                    Cancel Order
-                  </button>
-                ) : (
+                {selectedOrder.orderStatus == 'delivered' && (
                   <div>
                     {selectedOrder.products.map((p: any, i: number) => {
                       const replacementDays = p.product.replacementDays || 0
@@ -570,7 +576,7 @@ export default function Orders() {
                               {p.product?.title}
                             </p>
                             {remainingTime ? (
-                              <div >
+                              <div>
                                 <p className='text-xs text-yellow-400 '>
                                   Return in {remainingTime.days}d-
                                   {remainingTime.hours}h-{remainingTime.minutes}
@@ -607,7 +613,8 @@ export default function Orders() {
                   </div>
                 )}
               </div>
-              <div className=' flex gap-2 mt-5 justify-end'><button
+              <div className=' flex gap-2 mt-5 justify-end'>
+                <button
                   onClick={() => setSelectedOrder(null)}
                   className='px-4 py-2 bg-red-400 hover:bg-red-500 rounded transition'
                 >
@@ -626,7 +633,17 @@ export default function Orders() {
                   ) : (
                     <span>Track Order</span>
                   )}
-                </button></div>
+                </button>
+                {selectedOrder.orderStatus !== 'delivered' && (
+                  <button
+                  disabled={isCancelDisable(selectedOrder)}
+                    onClick={() => handleCancel(selectedOrder._id)}
+                    className={`px-4 py-2 bg-blue-500 rounded transition ${isCancelDisable(selectedOrder) ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+                  >
+                    Cancel Order
+                  </button>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}
