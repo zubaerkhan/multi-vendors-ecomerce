@@ -5,7 +5,13 @@ import ProductCard from '../ProductCard'
 
 export default function ProductCardPage() {
   const { allProductsData } = useSelector((state: RootState) => state.vendors)
-
+if (!allProductsData || allProductsData.length === 0) {
+    return (
+      <div className='min-h-[30vh] flex items-center justify-center text-white bg-black'>
+        No Products Found
+      </div>
+    )
+  }
   const products = Array.isArray(allProductsData)
     ? allProductsData.filter(
         (p: any) => p.isActive === true && p.verificationStatus === 'approved',
@@ -13,8 +19,8 @@ export default function ProductCardPage() {
     : []
 
   return (
-    <div className='min-h-screen w-full bg-linear-to-br from-gray-900 via-black to-gray-900 py-6'>
-      <div className='max-w-7xl mx-auto mb-13 text-center'>
+    <div className='min-h-[30vh] w-full bg-linear-to-br from-gray-900 via-black to-gray-900 px-4 pt-6'>
+      <div className='max-w-7xl mx-auto  text-center'>
         <h1 className='text-2xl sm:text-3xl font-bold text-white'>
           Explore Verified & Trending Products
         </h1>
@@ -22,7 +28,7 @@ export default function ProductCardPage() {
           Shop only from approved sellers with guarantedd quality
         </p>
       </div>
-      <div className='max-w-7xl mx-auto'>
+      <div className='max-w-7xl mx-auto mt-9'>
         {products.length === 0 ? (
           <div>No Products available right now</div>
         ) : (
