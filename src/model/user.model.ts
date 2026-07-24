@@ -1,29 +1,37 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 export interface IUser {
-  _id?: mongoose.Types.ObjectId;
-  name: string;
-  email: string;
-  password?: string;
-  image?: string;
-  phone?: string;
-  role: "user" | "vendor" | "admin";
+  _id?: mongoose.Types.ObjectId
+  name: string
+  email: string
+  password?: string
+  image?: string
+  phone?: string
+  role: 'user' | 'vendor' | 'admin'
   //for vendor
-  shopName: string; 
-  shopAddress?: string;
-  gstNumber?: string;
-  isApproved?: boolean;
-  verificationStatus: "pending" | "approved" | "rejected";
-  requestAt?: Date;
-  approvedAt?: Date;
-  rejectedReason?: string;
-  vendorProducts?: mongoose.Types.ObjectId[];
-  orders?: mongoose.Types.ObjectId[];
+  shopName: string
+  shopAddress?: string
+  gstNumber?: string
+  isApproved?: boolean
+  verificationStatus: 'pending' | 'approved' | 'rejected'
+  requestAt?: Date
+  approvedAt?: Date
+  rejectedReason?: string
+  vendorProducts?: mongoose.Types.ObjectId[]
+  orders?: mongoose.Types.ObjectId[]
   cart?: {
-    product: mongoose.Types.ObjectId;
-    quantity: number;
-  }[];
-  createdAt?: Date;
-  updatedAt?: Date;
+    product: mongoose.Types.ObjectId
+    quantity: number
+  }[]
+  chat?: {
+    with: mongoose.Types.ObjectId
+    messages: {
+      sender: mongoose.Types.ObjectId
+      text: string
+      createdAt?: Date
+    }[]
+    createdAt?: Date
+    updatedAt?: Date 
+  }[]
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -49,8 +57,8 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["user", "vendor", "admin"],
-      default: "user",
+      enum: ['user', 'vendor', 'admin'],
+      default: 'user',
     },
     shopName: {
       type: String,
@@ -67,8 +75,8 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     verificationStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
     },
     approvedAt: {
       type: Date,
@@ -79,20 +87,20 @@ const userSchema = new mongoose.Schema<IUser>(
     vendorProducts: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ],
     orders: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "Orders",
+        ref: 'Orders',
       },
     ],
     cart: [
       {
         product: {
           type: mongoose.Types.ObjectId,
-          ref: "Product",
+          ref: 'Product',
         },
         quantity: {
           type: Number,
@@ -100,9 +108,37 @@ const userSchema = new mongoose.Schema<IUser>(
         },
       },
     ],
+
+    chat: [
+      {
+        with: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        messages: [
+          {
+            sender: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'User',
+              required: true,
+            },
+            text: {
+              type: String,
+              required: true,
+            },
+            createdAt: {
+              type: Date,
+              default: Date.now,
+            },
+          },
+        ],
+        
+      },
+    ],
   },
   { timestamps: true },
-);
+)
 //যাদি  ইউজার মডেল তৈরি করা থাকে তাহলে সেটা ব্যবহার করো ‘||’ (অথবা) না থাকলে ইউজার মডেল তৈরি করো।
-const User = mongoose.models?.User || mongoose.model<IUser>("User", userSchema);
-export default User;
+const User = mongoose.models?.User || mongoose.model<IUser>('User', userSchema)
+export default User
